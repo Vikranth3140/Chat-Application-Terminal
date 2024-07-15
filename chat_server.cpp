@@ -1,82 +1,149 @@
+#include <boost/beast/core.hpp>
+#include <boost/beast/websocket.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/strand.hpp>
+#include <cstdlib>
+#include <functional>
 #include <iostream>
-#include <thread>
-#include <vector>
+#include <memory>
 #include <string>
-#include <algorithm>
-#include <mutex>
-#include <map>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <ctime>
+#include <vector>
 
-using namespace std;
+namespace beast = boost::beast;         // from <boost/beast.hpp>
+namespace http = beast::http;           // from <boost/beast/http.hpp>
+namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
+namespace net = boost::asio;            // from <boost/asio.hpp>
+using tcp = net::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
 
-map<int, string> clients;
-mutex clients_mutex;
-
-string get_current_time() {
-    time_t now = time(0);
-    tm *ltm = localtime(&now);
-    char time_str[9];
-    strftime(time_str, sizeof(time_str), "%H:%M:%S", ltm);
-    return string(time_str);
+void fail(beast::error_code ec, char const* what) {
+    std::cerr << what << ": " << ec.message() << "\n";
 }
 
-void handle_client(int client_socket) {
-    char buffer[1024];
-    while (true) {
-        int bytes_received = recv(client_socket, buffer, sizeof(buffer), 0);
-        if (bytes_received <= 0) {
-            lock_guard<mutex> guard(clients_mutex);
-            cout << "Client disconnected: " << clients[client_socket] << endl;
-            clients.erase(client_socket);
-            close(client_socket);
-            break;
-        }
-        buffer[bytes_received] = '\0';
-        string message(buffer);
+class session : public std::enable_shared_from_this<session> {
+    websocket::stream<beast::tcp_stream> ws_;
+    beast::flat_buffer buffer_;
 
-        cout << "Received message: " << message << endl;
+public:
+    explicit session(tcp::socket socket)
+        : ws_(std::move(socket)) {}
 
-        string timestamped_message = "[" + get_current_time() + "] " + message;
-
-        lock_guard<mutex> guard(clients_mutex);
-        for (const auto& client : clients) {
-            if (client.first != client_socket) {
-                cout << "Sending to client: " << client.first << endl;
-                send(client.first, timestamped_message.c_str(), timestamped_message.size(), 0);
-            }
-        }
-    }
-}
-
-int main() {
-    int server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    sockaddr_in server_address;
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(8080);
-    server_address.sin_addr.s_addr = INADDR_ANY;
-
-    bind(server_socket, (sockaddr*)&server_address, sizeof(server_address));
-    listen(server_socket, SOMAXCONN);
-
-    cout << "Server started on port 8080\n";
-
-    while (true) {
-        sockaddr_in client_address;
-        socklen_t client_size = sizeof(client_address);
-        int client_socket = accept(server_socket, (sockaddr*)&client_address, &client_size);
-
-        char buffer[1024];
-        recv(client_socket, buffer, sizeof(buffer), 0);
-        string username(buffer);
-
-        lock_guard<mutex> guard(clients_mutex);
-        clients[client_socket] = username;
-        cout << "Client connected: " << username << endl;
-
-        thread(handle_client, client_socket).detach();
+    void run() {
+        ws_.async_accept(
+            beast::bind_front_handler(
+                &session::on_accept,
+                shared_from_this()));
     }
 
-    return 0;
+private:
+    void on_accept(beast::error_code ec) {
+        if (ec) return fail(ec, "accept");
+        do_read();
+    }
+
+    void do_read() {
+        ws_.async_read(
+            buffer_,
+            beast::bind_front_handler(
+                &session::on_read,
+                shared_from_this()));
+    }
+
+    void on_read(beast::error_code ec, std::size_t bytes_transferred) {
+        boost::ignore_unused(bytes_transferred);
+        if (ec == websocket::error::closed) return;
+
+        if (ec) return fail(ec, "read");
+
+        std::string message = beast::buffers_to_string(buffer_.data());
+        buffer_.consume(buffer_.size());
+
+        ws_.text(ws_.got_text());
+        ws_.async_write(
+            net::buffer(message),
+            beast::bind_front_handler(
+                &session::on_write,
+                shared_from_this()));
+
+        do_read();
+    }
+
+    void on_write(beast::error_code ec, std::size_t bytes_transferred) {
+        boost::ignore_unused(bytes_transferred);
+        if (ec) return fail(ec, "write");
+    }
+};
+
+class listener : public std::enable_shared_from_this<listener> {
+    net::io_context& ioc_;
+    tcp::acceptor acceptor_;
+
+public:
+    listener(net::io_context& ioc, tcp::endpoint endpoint)
+        : ioc_(ioc), acceptor_(net::make_strand(ioc)) {
+        beast::error_code ec;
+
+        acceptor_.open(endpoint.protocol(), ec);
+        if (ec) {
+            fail(ec, "open");
+            return;
+        }
+
+        acceptor_.set_option(net::socket_base::reuse_address(true), ec);
+        if (ec) {
+            fail(ec, "set_option");
+            return;
+        }
+
+        acceptor_.bind(endpoint, ec);
+        if (ec) {
+            fail(ec, "bind");
+            return;
+        }
+
+        acceptor_.listen(net::socket_base::max_listen_connections, ec);
+        if (ec) {
+            fail(ec, "listen");
+            return;
+        }
+    }
+
+    void run() {
+        do_accept();
+    }
+
+private:
+    void do_accept() {
+        acceptor_.async_accept(
+            beast::bind_front_handler(
+                &listener::on_accept,
+                shared_from_this()));
+    }
+
+    void on_accept(beast::error_code ec, tcp::socket socket) {
+        if (ec) {
+            fail(ec, "accept");
+        } else {
+            std::make_shared<session>(std::move(socket))->run();
+        }
+
+        do_accept();
+    }
+};
+
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        std::cerr << "Usage: chat_server <address> <port>\n";
+        return EXIT_FAILURE;
+    }
+
+    auto const address = net::ip::make_address(argv[1]);
+    auto const port = static_cast<unsigned short>(std::atoi(argv[2]));
+
+    net::io_context ioc{1};
+
+    std::make_shared<listener>(ioc, tcp::endpoint{address, port})->run();
+
+    ioc.run();
+
+    return EXIT_SUCCESS;
 }
