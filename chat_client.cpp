@@ -35,6 +35,7 @@ int main() {
     while (true) {
         std::getline(std::cin, message);
         std::string full_message = username + ": " + message;
+        std::cout << "Sending: " << full_message << std::endl; // Debugging statement
         send(client_socket, full_message.c_str(), full_message.size(), 0);
     }
 

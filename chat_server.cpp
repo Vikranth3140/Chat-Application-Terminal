@@ -28,6 +28,7 @@ void handle_client(int client_socket) {
         std::lock_guard<std::mutex> guard(clients_mutex);
         for (int client : clients) {
             if (client != client_socket) {
+                std::cout << "Sending to client: " << client << std::endl; // Debugging statement
                 send(client, message.c_str(), message.size(), 0);
             }
         }
