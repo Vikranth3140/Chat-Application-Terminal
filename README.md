@@ -22,29 +22,9 @@ Chat-Application/
 
 ## Building the Project
 
-1. **Create a `CMakeLists.txt` file** in your project directory:
+### Using CMake
 
-    ```cmake
-    cmake_minimum_required(VERSION 3.10)
-
-    # Set the project name and version
-    project(ChatServer VERSION 1.0)
-
-    # Specify the C++ standard
-    set(CMAKE_CXX_STANDARD 11)
-    set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-    # Find Boost libraries
-    find_package(Boost 1.70 REQUIRED COMPONENTS system thread)
-
-    # Add the executable
-    add_executable(chat_server chat_server.cpp)
-
-    # Link Boost libraries
-    target_link_libraries(chat_server Boost::system Boost::thread pthread)
-    ```
-
-2. **Create the build directory and compile the project**:
+1. **Create the build directory and compile the project**:
 
     ```bash
     mkdir build
@@ -53,7 +33,7 @@ Chat-Application/
     make
     ```
 
-3. **Run the server**:
+2. **Run the server**:
 
     ```bash
     ./chat_server 0.0.0.0 8080
@@ -67,7 +47,7 @@ Chat-Application/
 ## File Descriptions
 
 - **chat_server.cpp**: The C++ server code using Boost.Beast for WebSocket communication.
-- **index.html**: The HTML/JavaScript client code.
+- **index.html**: The HTML/JavaScript client code with Bootstrap for styling.
 - **CMakeLists.txt**: CMake configuration file for building the project.
 - **Makefile**: Makefile for building the project.
 
