@@ -19,6 +19,7 @@ using namespace std;
 
 unordered_map<int, shared_ptr<websocket::stream<beast::tcp_stream>>> clients;
 mutex clients_mutex;
+int client_id = 0;
 
 string get_current_time() {
     time_t now = time(0);
@@ -36,10 +37,11 @@ class session : public enable_shared_from_this<session> {
     websocket::stream<beast::tcp_stream> ws_;
     beast::flat_buffer buffer_;
     string username_;
+    int id_;
 
 public:
     explicit session(tcp::socket socket)
-        : ws_(move(socket)) {}
+        : ws_(move(socket)), id_(++client_id) {}
 
     void run() {
         ws_.async_accept(
@@ -51,6 +53,10 @@ public:
 private:
     void on_accept(beast::error_code ec) {
         if (ec) return fail(ec, "accept");
+        {
+            lock_guard<mutex> guard(clients_mutex);
+            clients[id_] = make_shared<websocket::stream<beast::tcp_stream>>(move(ws_));
+        }
         do_read();
     }
 
@@ -64,7 +70,11 @@ private:
 
     void on_read(beast::error_code ec, size_t bytes_transferred) {
         boost::ignore_unused(bytes_transferred);
-        if (ec == websocket::error::closed) return;
+        if (ec == websocket::error::closed) {
+            lock_guard<mutex> guard(clients_mutex);
+            clients.erase(id_);
+            return;
+        }
 
         if (ec) return fail(ec, "read");
 
@@ -73,10 +83,6 @@ private:
 
         if (username_.empty()) {
             username_ = message;
-            {
-                lock_guard<mutex> guard(clients_mutex);
-                clients[ws_.next_layer().native_handle()] = make_shared<websocket::stream<beast::tcp_stream>>(move(ws_));
-            }
             cout << "Client connected: " << username_ << endl;
         } else {
             string timestamped_message = "[" + get_current_time() + "] " + username_ + ": " + message;
@@ -95,7 +101,7 @@ private:
     void broadcast(const string& message) {
         lock_guard<mutex> guard(clients_mutex);
         for (const auto& client : clients) {
-            if (client.first != ws_.next_layer().native_handle()) {
+            if (client.first != id_) {
                 client.second->text(client.second->got_text());
                 client.second->async_write(
                     net::buffer(message),
