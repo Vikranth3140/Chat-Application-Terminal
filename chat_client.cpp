@@ -4,13 +4,15 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+using namespace std;
+
 void receive_messages(int socket) {
     char buffer[1024];
     while (true) {
         int bytes_received = recv(socket, buffer, sizeof(buffer), 0);
         if (bytes_received > 0) {
             buffer[bytes_received] = '\0';
-            std::cout << "Server: " << buffer << std::endl;
+            cout << "Server: " << buffer << endl;
         }
     }
 }
@@ -23,19 +25,19 @@ int main() {
     inet_pton(AF_INET, "127.0.0.1", &server_address.sin_addr);
 
     connect(client_socket, (sockaddr*)&server_address, sizeof(server_address));
-    std::cout << "Connected to server\n";
+    cout << "Connected to server\n";
 
-    std::string username;
-    std::cout << "Enter your username: ";
-    std::getline(std::cin, username);
+    string username;
+    cout << "Enter your username: ";
+    getline(cin, username);
 
-    std::thread(receive_messages, client_socket).detach();
+    thread(receive_messages, client_socket).detach();
 
-    std::string message;
+    string message;
     while (true) {
-        std::getline(std::cin, message);
-        std::string full_message = username + ": " + message;
-        std::cout << "Sending: " << full_message << std::endl; // Debugging statement
+        getline(cin, message);
+        string full_message = username + ": " + message;
+        cout << "Sending: " << full_message << endl; // Debugging statement
         send(client_socket, full_message.c_str(), full_message.size(), 0);
     }
 
