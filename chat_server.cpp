@@ -2,6 +2,7 @@
 #include <thread>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <mutex>
 #include <unistd.h>
 #include <arpa/inet.h>
