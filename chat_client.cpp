@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-
 void receive_messages(int socket) {
     char buffer[1024];
     while (true) {
@@ -16,7 +15,6 @@ void receive_messages(int socket) {
     }
 }
 
-
 int main() {
     int client_socket = socket(AF_INET, SOCK_STREAM, 0);
     sockaddr_in server_address;
@@ -27,12 +25,17 @@ int main() {
     connect(client_socket, (sockaddr*)&server_address, sizeof(server_address));
     std::cout << "Connected to server\n";
 
+    std::string username;
+    std::cout << "Enter your username: ";
+    std::getline(std::cin, username);
+
     std::thread(receive_messages, client_socket).detach();
 
     std::string message;
     while (true) {
         std::getline(std::cin, message);
-        send(client_socket, message.c_str(), message.size(), 0);
+        std::string full_message = username + ": " + message;
+        send(client_socket, full_message.c_str(), full_message.size(), 0);
     }
 
     close(client_socket);

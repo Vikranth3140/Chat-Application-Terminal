@@ -10,7 +10,6 @@
 std::vector<int> clients;
 std::mutex clients_mutex;
 
-
 void handle_client(int client_socket) {
     char buffer[1024];
     while (true) {
@@ -24,6 +23,8 @@ void handle_client(int client_socket) {
         buffer[bytes_received] = '\0';
         std::string message(buffer);
 
+        std::cout << "Received message: " << message << std::endl; // Debugging statement
+
         std::lock_guard<std::mutex> guard(clients_mutex);
         for (int client : clients) {
             if (client != client_socket) {
@@ -32,8 +33,6 @@ void handle_client(int client_socket) {
         }
     }
 }
-
-
 
 int main() {
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
