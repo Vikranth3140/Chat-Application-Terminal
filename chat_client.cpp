@@ -12,7 +12,7 @@ void receive_messages(int socket) {
         int bytes_received = recv(socket, buffer, sizeof(buffer), 0);
         if (bytes_received > 0) {
             buffer[bytes_received] = '\0';
-            cout << "Server: " << buffer << endl;
+            cout << buffer << endl;
         }
     }
 }
@@ -30,6 +30,7 @@ int main() {
     string username;
     cout << "Enter your username: ";
     getline(cin, username);
+    send(client_socket, username.c_str(), username.size(), 0);
 
     thread(receive_messages, client_socket).detach();
 
@@ -37,7 +38,7 @@ int main() {
     while (true) {
         getline(cin, message);
         string full_message = username + ": " + message;
-        cout << "Sending: " << full_message << endl; // Debugging statement
+        cout << "Sending: " << full_message << endl;
         send(client_socket, full_message.c_str(), full_message.size(), 0);
     }
 
