@@ -29,7 +29,18 @@ Chat-Application/
 - C++ compiler (GCC, Clang, or MSVC)
 - CMake (for CMake build)
 
-## Building the Project
+## Setting Up the Project
+
+1. **Clone the repository**:
+
+    ```bash
+    git clone https://github.com/Vikranth3140/Chat-Application.git
+    cd Chat-Application
+    ```
+
+2. **Choose a build method**: You can build the project using either CMake or a Makefile.
+
+### Building the Project
 
 ### Using CMake
 
