@@ -70,7 +70,8 @@ Chat-Application/
 ## Running the Application
 
 1. Ensure the server is running as described above.
-2. Run the client, enter a username, and start sending messages.
+2. Open multiple terminals and run the client in each terminal to simulate multiple users.
+3. In each client terminal, enter a username, and start sending messages.
 
 ## File Descriptions
 
