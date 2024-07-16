@@ -78,6 +78,5 @@ int main() {
         thread(handle_client, client_socket).detach();
     }
 
-    close(server_socket);
     return 0;
 }

@@ -129,6 +129,43 @@ chat_server/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/chat_server.dir/build.make CMakeFiles/chat_server.dir/build
 .PHONY : chat_server/fast
 
+#=============================================================================
+# Target rules for targets named chat_client
+
+# Build rule for target.
+chat_client: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 chat_client
+.PHONY : chat_client
+
+# fast build rule for target.
+chat_client/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chat_client.dir/build.make CMakeFiles/chat_client.dir/build
+.PHONY : chat_client/fast
+
+chat_client.o: chat_client.cpp.o
+.PHONY : chat_client.o
+
+# target to build an object file
+chat_client.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chat_client.dir/build.make CMakeFiles/chat_client.dir/chat_client.cpp.o
+.PHONY : chat_client.cpp.o
+
+chat_client.i: chat_client.cpp.i
+.PHONY : chat_client.i
+
+# target to preprocess a source file
+chat_client.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chat_client.dir/build.make CMakeFiles/chat_client.dir/chat_client.cpp.i
+.PHONY : chat_client.cpp.i
+
+chat_client.s: chat_client.cpp.s
+.PHONY : chat_client.s
+
+# target to generate assembly for a file
+chat_client.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/chat_client.dir/build.make CMakeFiles/chat_client.dir/chat_client.cpp.s
+.PHONY : chat_client.cpp.s
+
 chat_server.o: chat_server.cpp.o
 .PHONY : chat_server.o
 
@@ -161,7 +198,11 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... chat_client"
 	@echo "... chat_server"
+	@echo "... chat_client.o"
+	@echo "... chat_client.i"
+	@echo "... chat_client.s"
 	@echo "... chat_server.o"
 	@echo "... chat_server.i"
 	@echo "... chat_server.s"

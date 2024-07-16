@@ -92,9 +92,6 @@ chat_server_EXTERNAL_OBJECTS =
 
 chat_server: CMakeFiles/chat_server.dir/chat_server.cpp.o
 chat_server: CMakeFiles/chat_server.dir/build.make
-chat_server: /usr/lib/x86_64-linux-gnu/libboost_system.so.1.74.0
-chat_server: /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.74.0
-chat_server: /usr/lib/x86_64-linux-gnu/libboost_atomic.so.1.74.0
 chat_server: CMakeFiles/chat_server.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/mnt/c/Users/vikra/OneDrive/Desktop/Chat-Application/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable chat_server"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/chat_server.dir/link.txt --verbose=$(VERBOSE)

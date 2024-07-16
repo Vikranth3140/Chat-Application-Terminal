@@ -2,6 +2,8 @@
 
 This is a simple chat application that consists of a C++ server and a C++ client. The server handles multiple client connections, and clients can send and receive messages in real-time.
 
+![alt text](image.png)
+
 ## Project Structure
 
 ```

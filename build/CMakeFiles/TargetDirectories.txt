@@ -1,3 +1,4 @@
 /mnt/c/Users/vikra/OneDrive/Desktop/Chat-Application/build/CMakeFiles/chat_server.dir
+/mnt/c/Users/vikra/OneDrive/Desktop/Chat-Application/build/CMakeFiles/chat_client.dir
 /mnt/c/Users/vikra/OneDrive/Desktop/Chat-Application/build/CMakeFiles/edit_cache.dir
 /mnt/c/Users/vikra/OneDrive/Desktop/Chat-Application/build/CMakeFiles/rebuild_cache.dir
