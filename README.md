@@ -1,6 +1,6 @@
 # Chat Application
 
-This project implements a simple chat application comprising a C++ server and a C++ client. The server is capable of handling multiple client connections simultaneously, facilitating real-time message exchange between connected clients.
+This project implements a simple chat application comprising a C++ server and a C++ client. The server is capable of handling multiple client connections simultaneously, facilitating real-time message exchange between connected clients. The application uses sockets for communication between the server and clients.
 
 ![Image](assets/image.png)
 
