@@ -4,15 +4,16 @@ This is a simple chat application that consists of a C++ server and a C++ client
 
 ## Project Structure
 
+```
 Chat-Application/
-├── chat_server.cpp
-├── chat_client.cpp
-├── CMakeLists.txt
-├── Makefile
-├── .gitignore
-├── LICENSE
-└── README.md
-
+    ├── chat_server.cpp
+    ├── chat_client.cpp
+    ├── CMakeLists.txt
+    ├── Makefile
+    ├── .gitignore
+    ├── LICENSE
+    └── README.md
+```
 
 ## Requirements
 
